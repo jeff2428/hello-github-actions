@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:13
+    container_name: kairos_db
+    environment:
+      - POSTGRES_USER=kairos
+      - POSTGRES_PASSWORD=kairos_secret
+      - POSTGRES_DB=kairos_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  backend:
+    build: .
+    container_name: kairos_backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./app:/code/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://kairos:kairos_secret@db:5432/kairos_dev
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
